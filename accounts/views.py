@@ -26,7 +26,7 @@ def register(request):
             return redirect('register')
           else:
             #Looks good
-            user= User.objects.create_user(username=username, email=email, password = password, first_name= first_name, last_name= last_name)  
+            user= User.objects.create_user(username=username, email=email, password=password, first_name=first_name, last_name=last_name)  
             user.save()
             messages.success(request,'You are now Registered')
             return redirect('login')
@@ -43,9 +43,23 @@ def dashboard(request):
 def login(request):
   if request.method == "POST":
     # Login User
-    return
+    username = request.POST['username']
+    password = request.POST['password']
+
+    user = auth.authenticate(username=username, password=password)
+
+    if user is not None:
+      auth.login(request, user)
+      messages.success(request, 'You are now logged in ')
+      return redirect('dashboard')
+    else:
+      messages.error(request, 'Invalid credentials')
+      return redirect('login')
   else :  
-   return render(request, 'accounts/login.html')  
+    return render(request, 'accounts/login.html')  
 
 def logout(request):
-  return redirect('index')    
+  if request.method == "POST":
+    auth.logout(request)
+    messages.success(request, 'You are logged out')
+    return redirect('index')    
